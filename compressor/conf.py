@@ -20,6 +20,7 @@ class CompressorConf(AppConf):
 
     CSS_COMPRESSOR = 'compressor.css.CssCompressor'
     JS_COMPRESSOR = 'compressor.js.JsCompressor'
+    STATIC_COMPRESSOR = 'compressor.static.StaticCompressor'
 
     URL = None
     ROOT = None
@@ -42,6 +43,8 @@ class CompressorConf(AppConf):
     YUI_CSS_ARGUMENTS = ''
     YUI_JS_ARGUMENTS = ''
     DATA_URI_MAX_SIZE = 1024
+
+    STATIC_FILTERS = ['compressor.filters.versioned_static.VersionedStaticFilter']
 
     # the cache backend to use
     CACHE_BACKEND = None

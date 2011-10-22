@@ -17,6 +17,13 @@ class ParserBase(object):
         """
         raise NotImplementedError
 
+    def static_elems(self):
+        """
+        Return the dictionary like attribute store of the given element
+        """
+        print self.content
+        return [self.content]
+    
     def elem_attribs(self, elem):
         """
         Return the dictionary like attribute store of the given element
