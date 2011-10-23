@@ -1,12 +1,8 @@
-import os
-
 from django.template import Context
 from django.template.loader import render_to_string
 
 from compressor.conf import settings
-from compressor.base import Compressor, SOURCE_HUNK, STATIC_FILE
-from compressor.exceptions import UncompressableFileError
-from compressor.cache import get_hexdigest
+from compressor.base import Compressor, STATIC_FILE
 from compressor.signals import post_compress
 
 class StaticCompressor(Compressor):
@@ -21,23 +17,6 @@ class StaticCompressor(Compressor):
 
 
     def split_contents(self):
-        # print self.split_content
-        # print self.__dict__
-        # if self.split_content:
-        #     return self.split_content
-        for elem in self.parser.static_elems():
-            print elem
-        #     attribs = self.parser.elem_attribs(elem)
-        #     if 'src' in attribs:
-        #         basename = self.get_basename(attribs['src'])
-        #         filename = self.get_filename(basename)
-        #         content = (SOURCE_FILE, filename, basename, elem)
-        #         self.split_content.append(content)
-        #     else:
-        #         content = self.parser.elem_content(elem)
-        #         self.split_content.append((SOURCE_HUNK, content, None, elem))
-        # print "self.split_content"
-        # print self.split_content
         basename = self.content
         filename = self.get_filename(basename)
         elem = {'attrs_dict':{}, 'tag':'', 'attrs':[], 'text':basename}

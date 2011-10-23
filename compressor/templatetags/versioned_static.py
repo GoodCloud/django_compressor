@@ -17,8 +17,6 @@ OUTPUT_INLINE = 'inline'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
 
 
-
-
 class StaticCompressorNode(template.Node):
 
     def __init__(self, content, kind="static", mode=OUTPUT_FILE):
@@ -66,29 +64,18 @@ class StaticCompressorNode(template.Node):
         return None, None
 
     def render(self, context, forced=False):
-        print "rendering"
         # Check if in debug mode
         if self.debug_mode(context):
             return self.nodelist.render(context)
 
-        print self.name
         # Prepare the compressor
         context.update({'name': self.name})
         compressor = self.compressor_cls(content=self.name,
                                          context=context)
         
-        print "compressor.output:"
-        print compressor.output(self.mode)
-        print "end"
-
         new_filepath = compressor.get_filepath(self.name)
         source_filename = compressor.get_filename(self.name)
         source_file = codecs.open(source_filename, 'rb')
-        print "file"
-        print source_filename
-        print new_filepath
-        print source_file
-
 
         # See if it has been rendered offline
         cached_offline = self.render_offline(compressor, forced)
@@ -100,15 +87,11 @@ class StaticCompressorNode(template.Node):
         if cache_content is not None:
             return cache_content
 
-        # call compressor output method and handle exceptions
+        # Save the file, and store it in the cache.
         if not compressor.storage.exists(new_filepath) or forced:
             compressor.storage.save(new_filepath, File(source_file))
 
-        # rendered_output = compressor.output(self.mode, forced=forced)
         rendered_output = compressor.storage.url(new_filepath)
-        print rendered_output
-        print compressor.storage.url(new_filepath)
-        # rendered_output = "%s%s" % (settings.COMPRESS_URL, new_filepath)
         if cache_key:
             cache_set(cache_key, rendered_output)
 

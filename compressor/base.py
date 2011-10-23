@@ -134,17 +134,13 @@ class Compressor(object):
                 'basename': basename,
             }
 
-            print kind
             if kind == SOURCE_FILE:
                 options = dict(options, filename=value)
                 value = self.get_filecontent(value, charset)
             
             if kind == STATIC_FILE:
                 options = dict(options, filename=value)
-                value = value
-                print value
                 value = self.filter(value, **options)
-                print value
 
             if self.all_mimetypes:
                 precompiled, value = self.precompile(value, **options)
@@ -219,7 +215,6 @@ class Compressor(object):
         any custom modification. Calls other mode specific methods or simply
         returns the content directly.
         """
-        print "output called"
         verbatim_content, rendered_content = self.filtered_input(mode, forced)
         if not verbatim_content and not rendered_content:
             return ''
@@ -249,7 +244,6 @@ class Compressor(object):
         The output method that saves the content to a file and renders
         the appropriate template with the file's URL.
         """
-        print "outputting file"
         new_filepath = self.get_filepath(content)
         if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content))

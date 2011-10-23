@@ -96,6 +96,10 @@ class Command(NoArgsCommand):
         The result is cached with a cache-key derived from the content of the
         compress nodes (not the content of the possibly linked files!).
         """
+        if settings.COMPRESS_VERSIONED_STATIC_TAG_BUILTIN:
+            from django.template.loader import add_to_builtins
+            add_to_builtins('compressor.templatetags.versioned_static')
+
         extensions = options.get('extensions')
         extensions = self.handle_extensions(extensions or ['html'])
         verbosity = int(options.get("verbosity", 0))

@@ -45,6 +45,7 @@ class CompressorConf(AppConf):
     DATA_URI_MAX_SIZE = 1024
 
     STATIC_FILTERS = ['compressor.filters.versioned_static.VersionedStaticFilter']
+    VERSIONED_STATIC_TAG_BUILTIN = False
 
     # the cache backend to use
     CACHE_BACKEND = None
