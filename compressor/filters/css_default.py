@@ -126,15 +126,17 @@ class CssAbsoluteFilter(FilterBase):
             # Save the file, and store it in the cache.
             if not compressor.storage.exists(new_filepath) or forced:
                 compressor.storage.save(new_filepath, File(source_file))
-
+            
             rendered_output = compressor.storage.url(new_filepath)
             if "?" in rendered_output:
                 rendered_output = rendered_output[:rendered_output.find("?")]
+            rendered_output = "url('%s')" % rendered_output
             if cache_key:
                 cache_set(cache_key, rendered_output)
+            
+            return rendered_output
+        else:
+            if self.has_scheme:
+                full_url = "%s%s" % (self.protocol, full_url)
 
-            full_url = rendered_output
-
-        if self.has_scheme:
-            full_url = "%s%s" % (self.protocol, full_url)
-        return "url('%s')" % self.add_suffix(full_url)
+            return "url('%s')" % self.add_suffix(full_url)

@@ -92,6 +92,8 @@ class StaticCompressorNode(template.Node):
             compressor.storage.save(new_filepath, File(source_file))
 
         rendered_output = compressor.storage.url(new_filepath)
+        if "?" in rendered_output:
+            rendered_output = rendered_output[:rendered_output.find("?")]
         if cache_key:
             cache_set(cache_key, rendered_output)
 
