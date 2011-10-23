@@ -25,6 +25,7 @@ from compressor.cache import get_offline_hexdigest, write_offline_manifest
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.templatetags.compress import CompressorNode
+from compressor.templatetags.versioned_static import StaticCompressorNode
 from compressor.utils import walk, any
 
 
@@ -192,11 +193,15 @@ class Command(NoArgsCommand):
                 context.render_context = extra_context.render_context
             for node in nodes:
                 context.push()
-                if extra_context and node._block_name:
-                    context['block'] = context.render_context[BLOCK_CONTEXT_KEY].pop(node._block_name)
-                    if context['block']:
-                        context['block'].context = context
-                key = get_offline_hexdigest(node.nodelist)
+                if isinstance(node, StaticCompressorNode):
+                    key = get_offline_hexdigest(node.name)
+                else:
+                    if extra_context and hasattr(node, "_block_name"):
+                        context['block'] = context.render_context[BLOCK_CONTEXT_KEY].pop(node._block_name)
+                        if context['block']:
+                            context['block'].context = context
+                    key = get_offline_hexdigest(node.nodelist)
+                
                 try:
                     result = node.render(context, forced=True)
                 except Exception, e:
@@ -215,14 +220,17 @@ class Command(NoArgsCommand):
 
     def walk_nodes(self, node, block_name=None):
         for node in getattr(node, "nodelist", []):
-            if isinstance(node, BlockNode):
-                block_name = node.name
-            if isinstance(node, CompressorNode):
-                node._block_name = block_name
+            if isinstance(node,StaticCompressorNode):
                 yield node
             else:
-                for node in self.walk_nodes(node, block_name=block_name):
+                if isinstance(node, BlockNode):
+                    block_name = node.name
+                if isinstance(node, CompressorNode):
+                    node._block_name = block_name
                     yield node
+                else:
+                    for node in self.walk_nodes(node, block_name=block_name):
+                        yield node
 
     def handle_extensions(self, extensions=('html',)):
         """

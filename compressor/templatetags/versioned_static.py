@@ -1,5 +1,8 @@
+import codecs
+
 from django import template
 from django.core.exceptions import ImproperlyConfigured
+from django.core.files.base import File
 
 from compressor.cache import (cache_get, cache_set, get_offline_hexdigest,
                               get_offline_manifest, get_templatetag_cachekey)
@@ -14,7 +17,9 @@ OUTPUT_INLINE = 'inline'
 OUTPUT_MODES = (OUTPUT_FILE, OUTPUT_INLINE)
 
 
-class StaticCompressor(object):
+
+
+class StaticCompressorNode(template.Node):
 
     def __init__(self, content, kind="static", mode=OUTPUT_FILE):
         self.name = content
@@ -75,7 +80,14 @@ class StaticCompressor(object):
         print "compressor.output:"
         print compressor.output(self.mode)
         print "end"
-        
+
+        new_filepath = compressor.get_filepath(self.name)
+        source_filename = compressor.get_filename(self.name)
+        source_file = codecs.open(source_filename, 'rb')
+        print "file"
+        print source_filename
+        print new_filepath
+        print source_file
 
 
         # See if it has been rendered offline
@@ -89,14 +101,22 @@ class StaticCompressor(object):
             return cache_content
 
         # call compressor output method and handle exceptions
-        rendered_output = compressor.output(self.mode, forced=forced)
+        if not compressor.storage.exists(new_filepath) or forced:
+            compressor.storage.save(new_filepath, File(source_file))
+
+        # rendered_output = compressor.output(self.mode, forced=forced)
+        rendered_output = compressor.storage.url(new_filepath)
+        print rendered_output
+        print compressor.storage.url(new_filepath)
+        # rendered_output = "%s%s" % (settings.COMPRESS_URL, new_filepath)
         if cache_key:
             cache_set(cache_key, rendered_output)
+
         return rendered_output
 
 
-@register.simple_tag
-def versioned_static(filename):
+@register.tag
+def versioned_static(parser, token):
     """
     Compresses linked and inline javascript or CSS into a single cached file.
 
@@ -120,13 +140,13 @@ def versioned_static(filename):
     # nodelist = parser.parse(('endcompress',))
     # parser.delete_first_token()
 
-    # args = token.split_contents()
+    args = token.split_contents()
 
     # if not len(args) in (2, 3, 4):
     #     raise template.TemplateSyntaxError(
     #         "%r tag requires either one, two or three arguments." % args[0])
 
-    # kind = args[1]
+    filename = args[1].strip('"').strip("'")
 
     # if len(args) >= 3:
     #     mode = args[2]
@@ -143,6 +163,6 @@ def versioned_static(filename):
 
     # save filename, versioned.
 
-
-    compressor = StaticCompressor(filename)
+    return StaticCompressorNode(filename)
+    compressor = StaticCompressorNode(filename)
     return compressor.render({})
