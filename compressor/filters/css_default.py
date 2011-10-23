@@ -2,10 +2,15 @@ import os
 import re
 import posixpath
 
+import codecs
+
 from compressor.cache import get_hexdigest, get_hashed_mtime
 from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
 from compressor.utils import staticfiles
+
+from django.core.files.base import File
+
 
 URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 
@@ -80,12 +85,55 @@ class CssAbsoluteFilter(FilterBase):
         return url
 
     def url_converter(self, matchobj):
+        from compressor.cache import cache_set
+        from compressor.templatetags.versioned_static import StaticCompressorNode
         url = matchobj.group(1)
         url = url.strip(' \'"')
         if url.startswith(('http://', 'https://', '/', 'data:')):
             return "url('%s')" % self.add_suffix(url)
         full_url = posixpath.normpath('/'.join([str(self.directory_name),
                                                 url]))
+        if settings.COMPRESS_VERSION_CSS_MEDIA:
+            name = full_url
+            if "/static/" in name:
+                name = name[8:]
+            if "?" in name:
+                name = name[:name.find("?")]
+            if "#" in name:
+                name = name[:name.find("#")]
+            
+            # Prepare the compressor
+            context = {'name': name}
+            forced = False
+            node = StaticCompressorNode(name)
+            compressor = node.compressor_cls(content=node.name,
+                                             context=context)
+            
+            new_filepath = compressor.get_filepath(node.name)
+            source_filename = compressor.get_filename(node.name)
+            source_file = codecs.open(source_filename, 'rb')
+
+            # See if it has been rendered offline
+            cached_offline = node.render_offline(compressor, forced)
+            if cached_offline:
+                return cached_offline
+
+            # Check cache
+            cache_key, cache_content = node.render_cached(compressor, forced)
+            if cache_content is not None:
+                return cache_content
+
+            # Save the file, and store it in the cache.
+            if not compressor.storage.exists(new_filepath) or forced:
+                compressor.storage.save(new_filepath, File(source_file))
+
+            rendered_output = compressor.storage.url(new_filepath)
+            if cache_key:
+                cache_set(cache_key, rendered_output)
+
+        full_url = rendered_output
+
+
         if self.has_scheme:
             full_url = "%s%s" % (self.protocol, full_url)
         return "url('%s')" % self.add_suffix(full_url)

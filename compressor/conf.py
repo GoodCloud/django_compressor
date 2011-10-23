@@ -46,6 +46,7 @@ class CompressorConf(AppConf):
 
     STATIC_FILTERS = ['compressor.filters.versioned_static.VersionedStaticFilter']
     VERSIONED_STATIC_TAG_BUILTIN = False
+    VERSION_CSS_MEDIA = False
 
     # the cache backend to use
     CACHE_BACKEND = None

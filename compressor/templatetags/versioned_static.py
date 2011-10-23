@@ -147,5 +147,3 @@ def versioned_static(parser, token):
     # save filename, versioned.
 
     return StaticCompressorNode(filename)
-    compressor = StaticCompressorNode(filename)
-    return compressor.render({})
