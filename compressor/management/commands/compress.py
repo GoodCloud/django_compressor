@@ -175,7 +175,7 @@ class Command(NoArgsCommand):
                 "No 'compress' template tags found in templates.")
 
         if verbosity > 0:
-            log.write("Found 'compress' tags in:\n\t" +
+            log.write("Found 'compress' or 'versioned_static' tags in:\n\t" +
                       "\n\t".join((t.template_name for t in compressor_nodes.keys())) + "\n")
 
         log.write("Compressing... ")
