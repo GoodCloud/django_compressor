@@ -95,8 +95,9 @@ class CssAbsoluteFilter(FilterBase):
                                                 url]))
         if settings.COMPRESS_VERSION_CSS_MEDIA:
             name = full_url
-            if "/static/" in name:
-                name = name[8:]
+            trimmed_url = settings.COMPRESS_URL.replace("http://", "").replace("https://", "")
+            if trimmed_url in name:
+                name = name[len(trimmed_url):]
             if "?" in name:
                 name = name[:name.find("?")]
             if "#" in name:
