@@ -24,13 +24,15 @@ class CssAbsoluteFilter(FilterBase):
         self.url = settings.COMPRESS_URL.rstrip('/')
         self.url_path = self.url
         self.has_scheme = False
+        self.PROJECT_PATH = os.path.abspath(os.path.dirname(__name__))
 
     def input(self, filename=None, basename=None, **kwargs):
         if filename is not None:
             filename = os.path.normcase(os.path.abspath(filename))
         print "Compressing ", basename,
         if (not (filename and filename.startswith(self.root)) and
-                not self.find(basename)):
+                not self.find(basename)) and \
+                not filename.startswith(self.PROJECT_PATH):
             return self.content
         self.path = basename.replace(os.sep, '/')
         self.path = self.path.lstrip('/')
@@ -43,7 +45,7 @@ class CssAbsoluteFilter(FilterBase):
             self.host = parts[2]
         self.directory_name = '/'.join((self.url, os.path.dirname(self.path)))
         ret = URL_PATTERN.sub(self.url_converter, self.content)
-        print "done.\n"
+        print "done."
         return ret
 
     def find(self, basename):
