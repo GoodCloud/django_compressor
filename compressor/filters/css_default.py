@@ -33,6 +33,7 @@ class CssAbsoluteFilter(FilterBase):
         if (not (filename and filename.startswith(self.root)) and
                 not self.find(basename)) and \
                 not filename.startswith(self.PROJECT_PATH):
+            print "done."
             return self.content
         self.path = basename.replace(os.sep, '/')
         self.path = self.path.lstrip('/')
