@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import posixpath
 
@@ -27,6 +28,7 @@ class CssAbsoluteFilter(FilterBase):
     def input(self, filename=None, basename=None, **kwargs):
         if filename is not None:
             filename = os.path.normcase(os.path.abspath(filename))
+        print "Compressing ", basename,
         if (not (filename and filename.startswith(self.root)) and
                 not self.find(basename)):
             return self.content
@@ -40,7 +42,9 @@ class CssAbsoluteFilter(FilterBase):
             self.protocol = '%s/' % '/'.join(parts[:2])
             self.host = parts[2]
         self.directory_name = '/'.join((self.url, os.path.dirname(self.path)))
-        return URL_PATTERN.sub(self.url_converter, self.content)
+        ret = URL_PATTERN.sub(self.url_converter, self.content)
+        print "done.\n"
+        return ret
 
     def find(self, basename):
         if settings.DEBUG and basename and staticfiles.finders:
@@ -105,7 +109,9 @@ class CssAbsoluteFilter(FilterBase):
             
             # Prepare the compressor
             context = {'name': name}
-            forced = False
+            forced = settings.COMPRESS_OFFLINE == True and "compress" in sys.argv
+            if forced:
+                print ".",
             node = StaticCompressorNode(name)
             compressor = node.compressor_cls(content=node.name,
                                              context=context)

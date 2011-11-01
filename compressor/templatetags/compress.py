@@ -6,6 +6,7 @@ from compressor.cache import (cache_get, cache_set, get_offline_hexdigest,
 from compressor.conf import settings
 from compressor.exceptions import OfflineGenerationError
 from compressor.utils import get_class
+from compressor.templatetags.versioned_static import StaticCompressorNode
 
 register = template.Library()
 
@@ -48,7 +49,10 @@ class CompressorNode(template.Node):
         """
         if (settings.COMPRESS_ENABLED and
                 settings.COMPRESS_OFFLINE) and not forced:
-            key = get_offline_hexdigest(self.nodelist)
+            if isinstance(self, StaticCompressorNode):
+                key = get_offline_hexdigest(self.name)
+            else:
+                key = get_offline_hexdigest(self.nodelist)
             offline_manifest = get_offline_manifest()
             if key in offline_manifest:
                 return offline_manifest[key]

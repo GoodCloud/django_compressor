@@ -178,7 +178,7 @@ class Command(NoArgsCommand):
             log.write("Found 'compress' or 'versioned_static' tags in:\n\t" +
                       "\n\t".join((t.template_name for t in compressor_nodes.keys())) + "\n")
 
-        log.write("Compressing... ")
+        log.write("Compressing... \n")
         count = 0
         results = []
         offline_manifest = {}
@@ -205,7 +205,7 @@ class Command(NoArgsCommand):
                         if context['block']:
                             context['block'].context = context
                     key = get_offline_hexdigest(node.nodelist)
-                
+
                 try:
                     result = node.render(context, forced=True)
                 except Exception, e:

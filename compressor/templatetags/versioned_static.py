@@ -44,7 +44,10 @@ class StaticCompressorNode(template.Node):
         """
         if (settings.COMPRESS_ENABLED and
                 settings.COMPRESS_OFFLINE) and not forced:
-            key = get_offline_hexdigest(self.nodelist)
+            if isinstance(self, StaticCompressorNode):
+                key = get_offline_hexdigest(self.name)
+            else:
+                key = get_offline_hexdigest(self.nodelist)
             offline_manifest = get_offline_manifest()
             if key in offline_manifest:
                 return offline_manifest[key]
