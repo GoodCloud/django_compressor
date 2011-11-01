@@ -248,6 +248,9 @@ class Compressor(object):
         if not self.storage.exists(new_filepath) or forced:
             self.storage.save(new_filepath, ContentFile(content))
         url = self.storage.url(new_filepath)
+        if "?" in url:
+            url = url[:url.find("?")]
+
         return self.render_output(mode, {"url": url})
 
     def output_inline(self, mode, content, forced=False):
