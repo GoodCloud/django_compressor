@@ -65,14 +65,20 @@ def get_offline_manifest_filename():
 def get_offline_manifest():
     manifest = cache.get(simple_cachekey("manifest"))
     if manifest is None:
+        print "not in cache"
         filename = get_offline_manifest_filename()
         if default_storage.exists(filename):
+            print "found file"
             manifest = simplejson.load(default_storage.open(filename))
             if manifest is not None:
+                print "setting cache"
                 cache.set(simple_cachekey("manifest"), manifest)
                 return manifest
-        
+        else:
+            print "no file"
         return {}
+    else:
+        print "found in cache"
 
     return manifest
     
